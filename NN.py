@@ -59,7 +59,7 @@ class NN:
         #weights is an array of weights
         for layer_weights in self.weights:
             # this will yield o_i, output for layer i
-            yield get_sigmoid(np.dot(layer_input,layer_weights))
+            yield get_sigmoid(np.dot(layer_input,layer_weights.T))
 
 
     # evaluation function to calcuate the difference of the prediction and the true label
