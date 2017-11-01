@@ -95,6 +95,6 @@ class NN:
                 self.weights=self.back_prop(np.array(y),self.forward_pass(x))
 
     def predict(self,prediction_x):
-        if(!self.trained):self.train()
+        if(not self.trained):self.train()
         for layer in self.foward_pass(prediction_x):pass
         return layer
