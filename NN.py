@@ -59,7 +59,7 @@ class NN:
         #weights is an array of weights
         for layer_weights in self.weights:
             # this will yield o_i, output for layer i
-            yield get_sigmoid(np.dot(layer_input,layer_weights))
+            yield get_sigmoid(np.dot(layer_input,layer_weights.T))
 
 
     # evaluation function to calcuate the difference of the prediction and the true label
@@ -91,8 +91,8 @@ class NN:
     def train(self):
         self.trained=True
         for _ in xrange(self.epochs):
-            for (x,y) in (self.input_x,self.input_y):
-                self.weights=self.back_prop(np.array(y),self.forward_pass(x))
+            for (x,y) in (self.input_x, self.input_y):
+                self.weights=self.back_prop(np.array(y), list(self.forward_pass(x)))
 
     def predict(self,prediction_x):
         if(not self.trained):self.train()
