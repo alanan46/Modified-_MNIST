@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Convolutional Neural Network Estimator for MNIST, built with tf.layers."""
+"""Convolutional Neural Network Estimator for M-MNIST, built with tf.layers."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -34,8 +34,8 @@ def cnn_model_fn(features, labels, mode):
   # Convolutional Layer #1
   # Computes 32 features using a 5x5 filter with ReLU activation.
   # Padding is added to preserve width and height.
-  # Input Tensor Shape: [batch_size, 28, 28, 1]
-  # Output Tensor Shape: [batch_size, 28, 28, 32]
+  # Input Tensor Shape: [batch_size, 28, 28, 1] new [batch_size, 64, 64, 1]
+  # Output Tensor Shape: [batch_size, 28, 28, 32] new [batch_size, 64, 64, 96]
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
       filters=96,
@@ -45,15 +45,15 @@ def cnn_model_fn(features, labels, mode):
 
   # Pooling Layer #1
   # First max pooling layer with a 2x2 filter and stride of 2
-  # Input Tensor Shape: [batch_size, 28, 28, 32]
-  # Output Tensor Shape: [batch_size, 14, 14, 32]
+  # Input Tensor Shape: [batch_size, 28, 28, 32] new [batch_size, 64, 64, 96]
+  # Output Tensor Shape: [batch_size, 14, 14, 32] new [batch_size, 64/2, 64/2, 96]
   pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
 
   # Convolutional Layer #2
   # Computes 64 features using a 5x5 filter.
   # Padding is added to preserve width and height.
-  # Input Tensor Shape: [batch_size, 14, 14, 32]
-  # Output Tensor Shape: [batch_size, 14, 14, 64]
+  # Input Tensor Shape: [batch_size, 14, 14, 32] new [batch_size, 64/2, 64/2, 96]
+  # Output Tensor Shape: [batch_size, 14, 14, 64] new [batch_size, 64/2, 64/2, 192]
   conv2 = tf.layers.conv2d(
       inputs=pool1,
       filters=192,
@@ -63,18 +63,18 @@ def cnn_model_fn(features, labels, mode):
 
   # Pooling Layer #2
   # Second max pooling layer with a 2x2 filter and stride of 2
-  # Input Tensor Shape: [batch_size, 14, 14, 64]
-  # Output Tensor Shape: [batch_size, 7, 7, 64]
+  # Input Tensor Shape: [batch_size, 14, 14, 64]  new [batch_size, 64/2, 64/2, 192]
+  # Output Tensor Shape: [batch_size, 7, 7, 64]  new [batch_size, 16, 16, 192]
   pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 
   # Flatten tensor into a batch of vectors
-  # Input Tensor Shape: [batch_size, 7, 7, 64]
-  # Output Tensor Shape: [batch_size, 7 * 7 * 64]
-  pool2_flat = tf.reshape(pool2, [-1, 16 * 16 * 64])
+  # Input Tensor Shape: [batch_size, 7, 7, 64] new [batch_size, 16, 16, 192]
+  # Output Tensor Shape: [batch_size, 7 * 7 * 64]  new [batch_size, 16, 16, 192]
+  pool2_flat = tf.reshape(pool2, [-1, 16 * 16 * 192])
 
   # Dense Layer
   # Densely connected layer with 1024 neurons
-  # Input Tensor Shape: [batch_size, 7 * 7 * 64]
+  # Input Tensor Shape: [batch_size, 7 * 7 * 64] new [batch_size, 16, 16, 192]
   # Output Tensor Shape: [batch_size, 1024]
   dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
 
@@ -84,8 +84,8 @@ def cnn_model_fn(features, labels, mode):
 
   # Logits layer
   # Input Tensor Shape: [batch_size, 1024]
-  # Output Tensor Shape: [batch_size, 10]
-  logits = tf.layers.dense(inputs=dropout, units=82)
+  # Output Tensor Shape: [batch_size, 10] [batch_size, 82]
+  logits = tf.layers.dense(inputs=dropout, units=40)
 
   predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
@@ -98,13 +98,13 @@ def cnn_model_fn(features, labels, mode):
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
   # Calculate Loss (for both TRAIN and EVAL modes)
-  onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=82)
+  onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=40)
   loss = tf.losses.softmax_cross_entropy(
       onehot_labels=onehot_labels, logits=logits)
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.003)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
     train_op = optimizer.minimize(
         loss=loss,
         global_step=tf.train.get_global_step())
@@ -119,7 +119,7 @@ def cnn_model_fn(features, labels, mode):
 
 
 def main(unused_argv):
-   
+
   # Load training and eval data
   # mnist = tf.contrib.learn.datasets.load_dataset("mnist")
   # train_data = mnist.train.images  # Returns np.array
@@ -132,7 +132,7 @@ def main(unused_argv):
   x = x.reshape(-1, 64, 64) # reshape
   y = y.reshape(-1)
   x = x.astype(np.float32, copy=False)
-  y = y.astype(np.float32, copy=False)
+  y = y.astype(np.int32, copy=False)
   train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.8, random_state=42)
   # Create the Estimator
   mnist_classifier = tf.estimator.Estimator(
@@ -150,7 +150,7 @@ def main(unused_argv):
       y=train_labels,
       batch_size=100,
       num_epochs=None,
-      shuffle=False)
+      shuffle=True)
   mnist_classifier.train(
       input_fn=train_input_fn,
       steps=10000,
@@ -164,8 +164,8 @@ def main(unused_argv):
       shuffle=False)
   eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
   print(eval_results)
-  
-  summary_writer = tf.train.SummaryWriter('./tensorflow/log', sess.graph)
+
+  summary_writer = tf.summary.FileWriter('./tensorflow/log', sess.graph)
 
 
 if __name__ == "__main__":
