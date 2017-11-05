@@ -1,4 +1,5 @@
 import numpy as np
+import operator
 from mahotas.features import zernike_moments as zernike
 from skimage.morphology import thin
 from skimage.measure import label
@@ -52,6 +53,9 @@ def get_features(x,mode,flat=False):
                     p = np.zeros([64,64], dtype=bool)
                     p[0:digit.shape[0], 0:digit.shape[1]] = digit
                     l.append(p)
+## Uncomment to output single image with digits stacked vertically
+#                X_pad.append(np.vstack([l[0],l[1],l[2]]))
+##
                 X_pad.append(l)
             return X_pad
     elif mode == 'zernike':
