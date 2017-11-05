@@ -60,7 +60,7 @@ def crop_minAreaRect(img, rect):
     img_rot = cv2.warpAffine(img,M,(cols,rows))
     # rotate bounding box
     rect0 = (rect[0], rect[1], 0.0)
-    box = cv2.cv.BoxPoints(rect0)
+    box = cv2.cv.BoxPoints(rect)
     pts = np.int0(cv2.transform(np.array([box]), M))[0]    
     pts[pts < 0] = 0
     # crop

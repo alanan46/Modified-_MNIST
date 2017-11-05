@@ -85,7 +85,7 @@ def cnn_model_fn(features, labels, mode):
   # Logits layer
   # Input Tensor Shape: [batch_size, 1024]
   # Output Tensor Shape: [batch_size, 10] [batch_size, 82]
-  logits = tf.layers.dense(inputs=dropout, units=82)
+  logits = tf.layers.dense(inputs=dropout, units=40)
 
   predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
@@ -98,7 +98,7 @@ def cnn_model_fn(features, labels, mode):
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
   # Calculate Loss (for both TRAIN and EVAL modes)
-  onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=82)
+  onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=40)
   loss = tf.losses.softmax_cross_entropy(
       onehot_labels=onehot_labels, logits=logits)
 
@@ -165,7 +165,7 @@ def main(unused_argv):
   eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
   print(eval_results)
 
-  summary_writer = tf.train.SummaryWriter('./tensorflow/log', sess.graph)
+  summary_writer = tf.summary.FileWriter('./tensorflow/log', sess.graph)
 
 
 if __name__ == "__main__":
