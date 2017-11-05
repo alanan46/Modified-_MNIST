@@ -93,6 +93,11 @@ class NN:
         for _ in xrange(self.epochs):
             for (x,y) in (self.input_x,self.input_y):
                 self.weights=self.back_prop(np.array(y),list(self.forward_pass(x)))
+        #write down the valuable trained result into a file so that we can reuse this particular set of weights for refining
+        #or train another data set
+        #w+ means overwrite the file if exist, can be changed
+        with open("./weights.npy",'w+') as f:
+            np.save(f,self.weights)
 
     def predict(self,prediction_x):
         if(not self.trained):self.train()
