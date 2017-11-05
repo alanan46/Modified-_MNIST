@@ -1,3 +1,8 @@
+import numpy as np
+from mahotas.features import zernike_moments as zernike
+from skimage.morphology import thin
+from skimage.measure import label
+from skimage.measure import regionprops
 def get_features(x,mode,flat=False):
     """Get desired features from input dataset. mode is a string:'digits', 
     'zernike'. If flat is True, digits are returned in a stacked array, which 
