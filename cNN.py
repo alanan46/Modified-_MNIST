@@ -22,6 +22,8 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 tf.logging.set_verbosity(tf.logging.INFO)
+label_class=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 24, 25,
+ 27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 54, 56, 63, 64, 72, 81]
 
 
 def cnn_model_fn(features, labels, mode):
@@ -84,7 +86,7 @@ def cnn_model_fn(features, labels, mode):
 
   # Logits layer
   # Input Tensor Shape: [batch_size, 1024]
-  # Output Tensor Shape: [batch_size, 10] [batch_size, 82]
+  # Output Tensor Shape: [batch_size, 10] [batch_size, 40]
   logits = tf.layers.dense(inputs=dropout, units=40)
 
   predictions = {
@@ -131,9 +133,15 @@ def main(unused_argv):
   y = np.loadtxt("half1_train_y.csv", delimiter=",")
   x = x.reshape(-1, 64, 64) # reshape
   y = y.reshape(-1)
+  y_class=[]
+  for element in y:
+      y_class.append(label_class.index(element))
+  y_class=np.array(y_class)
+  y_class=y_class.astype(np.int32,copy=False)
   x = x.astype(np.float32, copy=False)
-  y = y.astype(np.int32, copy=False)
-  train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.8, random_state=42)
+  #y = y.astype(np.int32, copy=False)
+
+  train_data, eval_data, train_labels, eval_labels = train_test_split(x, y_class, test_size=0.1, random_state=42)
   # Create the Estimator
   mnist_classifier = tf.estimator.Estimator(
       model_fn=cnn_model_fn, model_dir="./mnist_convnet_model")
@@ -153,7 +161,7 @@ def main(unused_argv):
       shuffle=True)
   mnist_classifier.train(
       input_fn=train_input_fn,
-      steps=10000,
+      steps=2000,
       hooks=[logging_hook])
 
   # Evaluate the model and print results
@@ -165,7 +173,7 @@ def main(unused_argv):
   eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
   print(eval_results)
 
-  summary_writer = tf.summary.FileWriter('./tensorflow/log', sess.graph)
+  summary_writer = tf.summary.FileWriter('./tensorflow/log2', sess.graph)
 
 
 if __name__ == "__main__":
