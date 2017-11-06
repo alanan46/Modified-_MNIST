@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
-import tensorflow as tf
-import copy
+# import tensorflow as tf
+# import copy
 # from sklearn.model_selection import train_test_split
 class NN:
 
@@ -28,7 +28,7 @@ class NN:
         #in debug mode this can be turned of to avoid plateau
         # np.random.seed(0)
         #open up a tf session so that the tensor obj can be evaluated
-        self.sess=tf.Session()
+        # self.sess=tf.Session()
 
         # 0,1 is the range for the weights
         #(self.num_of_neuron_per_layer,self.num_of_neuron_per_layer) is the dimension of the numpy array for weights
@@ -174,6 +174,6 @@ class NN:
     def predict(self,prediction_x):
         if(not self.trained):self.train()
         for layer in self.forward_pass(prediction_x):pass
-        #label is dummy here, the value we give is not used  since we are in prediction mode
+
         print('layer',layer)
         return layer
