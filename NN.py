@@ -11,9 +11,9 @@ class NN:
      In this design, we do cross Validation outside the class
      i.e. we feed in the input_x,input_y as they would have been seperated already
      """
-    label_class=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 24, 25,
-      27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 54, 56, 63, 64, 72, 81]
-
+    # label_class=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 24, 25,
+    #   27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 54, 56, 63, 64, 72, 81]
+    label_class=[[1,0,0],[0,1,0],[0,0,1]]
     def __init__(self,input_x,input_y,num_of_hidden_layer,num_of_neuron_per_layer,learn_rate,epochs):
         self.num_of_hidden_layer=num_of_hidden_layer
         self.num_of_neuron_per_layer=num_of_neuron_per_layer
@@ -42,7 +42,7 @@ class NN:
         for _ in xrange(self.num_of_hidden_layer-1):
             sizeArr.append( (self.num_of_neuron_per_layer,self.num_of_neuron_per_layer) )
         #init weights to calculate last hidden layer --> output layer
-        sizeArr.append((40,self.num_of_neuron_per_layer) )
+        sizeArr.append((3,self.num_of_neuron_per_layer) )
         self.weights=[np.random.uniform(-.5, .5,size) for size in sizeArr]
 
     def get_relu_deriv(self,x):
@@ -62,8 +62,12 @@ class NN:
     #utility function to calcuate the predictions
     def get_accuracy(self,predictions,labels):
         err=0.0
-        for (prediction,label) in (predictions,labels):
-            if (prediction !=label):err+=1
+        print ("length :",len(predictions))
+        for (prediction,label) in zip(predictions,labels):
+            if (prediction[0] !=label[0]):
+                print(prediction[0],label[0])
+                err+=1
+        print("error:",1.0-err/len(predictions) )
         return (1-err/len(predictions))
 
     #calcuate Rectified Linear Unit we may want to consider using relu instead of sigmoid
@@ -92,9 +96,9 @@ class NN:
         # onehot_label=tf.one_hot(indices=tf.cast(label[0], tf.int32), depth=40)
         # feed the class number to onehot and get the onhot representation
         if(not prediction_mode):
-            index=NN.label_class.index(label[0])
+            index=label[0]
             print ("index is ",index)
-            onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
+            onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=3)
         # print ('out_layer ',output_layer)
         #the output_layer will contain 40 neurons,convert them to tensor object
         #so that we can use the tf.losses.softmax_cross_entropy()
@@ -106,7 +110,7 @@ class NN:
         "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
         }
         # if we are in prediction mode instead of training mode, we just wish to return the class
-        if(prediction_mode): return (self.sess.run( predictions['classes'] ), self.sess.run( predictions['probabilities']))
+        if(prediction_mode): return (self.sess.run(predictions['classes']),self.sess.run(predictions['probabilities']))
 
         # we calculate the loss using softmax_cross_entropy
         loss = tf.losses.softmax_cross_entropy(
@@ -118,13 +122,13 @@ class NN:
 
 
     def get_delta(self,label,layers):
-        self.eval_output(label,layers[-1])
-        index=NN.label_class.index(label[0])
-        onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
-        # tmp=-1*self.eval_output(label,layers[-1])
-        tmp=(self.sess.run(onehot_label)-layers[-1])
-        #tmp is our delta_N+H+1
-        tmp*=self.get_sigmoid_deriv(layers[-1])
+        # self.eval_output(label,layers[-1])
+        # index=NN.label_class.index(label[0])
+        # onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
+        # tmp=(self.sess.run(onehot_label)-layers[-1])
+        # tmp=self.eval_output(label,layers[-1])*self.get_sigmoid_deriv(layers[-1])
+        tmp=(label -layers[-1] )*self.get_sigmoid_deriv(layers[-1])
+
         # hidden_layers=copy.deepcopy(layers)
         # del hidden_layers[0] # delete the input layer
         #starting from the last hidden layer aka layers[-2] with the last elements of weights
@@ -166,11 +170,10 @@ class NN:
         # with open("./weights.npy",'w+') as f:
         #     np.save(f,self.weights)
 
-####!!!!!! in debug mode 
+####!!!!!! in debug mode
     def predict(self,prediction_x):
         if(not self.trained):self.train()
         for layer in self.forward_pass(prediction_x):pass
         #label is dummy here, the value we give is not used  since we are in prediction mode
-        index,prob=self.eval_output(label=0,output_layer=layer,prediction_mode=True)
-        print prob
-        return NN.label_class[index]
+        print('layer',layer)
+        return layer
