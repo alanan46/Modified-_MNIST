@@ -24,7 +24,9 @@ class NN:
         self.learn_rate=learn_rate
         self.epochs=epochs
         self.trained=False
-        np.random.seed(0)
+
+        #in debug mode this can be turned of to avoid plateau
+        # np.random.seed(0)
         #open up a tf session so that the tensor obj can be evaluated
         self.sess=tf.Session()
 
@@ -137,12 +139,13 @@ class NN:
     def train(self):
         self.trained=True
         for i in xrange(self.epochs):
-            if ( i%100==0):
-                print('on epoch: ', i)
-
+            print("on epoch:", i)
+            j=1
             for (x,y) in zip(self.input_x,self.input_y):
                 #updates the weights matrix after every round of back_prop
                 self.weights=self.back_prop(np.array(y),list(self.forward_pass(x)))
+                print ("on train_data : ",j)
+                j+=1
         #write down the valuable trained result into a file so that we can reuse this particular set of weights for refining
         #or train another data set
         #w+ means overwrite the file if exist, can be changed
@@ -153,4 +156,5 @@ class NN:
         if(not self.trained):self.train()
         for layer in self.foward_pass(prediction_x):pass
         #label is dummy here, the value we give is not used  since we are in prediction mode
-        return self.eval_output(label=0,output_layer=layer,prediction_mode=True)
+        index=self.eval_output(label=0,output_layer=layer,prediction_mode=True)
+        return NN.label_class[index]
