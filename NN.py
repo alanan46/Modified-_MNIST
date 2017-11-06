@@ -43,9 +43,12 @@ class NN:
             sizeArr.append( (self.num_of_neuron_per_layer,self.num_of_neuron_per_layer) )
         #init weights to calculate last hidden layer --> output layer
         sizeArr.append((40,self.num_of_neuron_per_layer) )
-        self.weights=[np.random.uniform(0, 1,size) for size in sizeArr]
+        self.weights=[np.random.uniform(-.5, .5,size) for size in sizeArr]
 
-
+    def get_relu_deriv(self,x):
+        x[x<=0]=0
+        x[x>0]=1
+        return x
 
     #calculate the sigmoid function result based on input number
     def get_sigmoid(self,x):
@@ -88,8 +91,10 @@ class NN:
         # the one_ hot function will do the dirty work for us to cast a possible label to 40 classes
         # onehot_label=tf.one_hot(indices=tf.cast(label[0], tf.int32), depth=40)
         # feed the class number to onehot and get the onhot representation
-        onehot_label=tf.one_hot(indices=tf.cast(NN.label_class.index(label[0]), tf.int32 ), depth=40)
-
+        index=NN.label_class.index(label[0])
+        print ("index is ",index)
+        onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
+        # print ('out_layer ',output_layer)
         #the output_layer will contain 40 neurons,convert them to tensor object
         #so that we can use the tf.losses.softmax_cross_entropy()
         logits=tf.convert_to_tensor(output_layer)
@@ -112,7 +117,11 @@ class NN:
 
 
     def get_delta(self,label,layers):
-        tmp=self.eval_output(label,layers[-1])
+        self.eval_output(label,layers[-1])
+        index=NN.label_class.index(label[0])
+        onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
+        # tmp=-1*self.eval_output(label,layers[-1])
+        tmp=(self.sess.run(onehot_label)-layers[-1])
         #tmp is our delta_N+H+1
         tmp*=self.get_sigmoid_deriv(layers[-1])
         # hidden_layers=copy.deepcopy(layers)
@@ -139,13 +148,17 @@ class NN:
     def train(self):
         self.trained=True
         for i in xrange(self.epochs):
-            print("on epoch:", i)
+
             j=1
             for (x,y) in zip(self.input_x,self.input_y):
                 #updates the weights matrix after every round of back_prop
                 self.weights=self.back_prop(np.array(y),list(self.forward_pass(x)))
+                print("on epoch:", i)
                 print ("on train_data : ",j)
+
                 j+=1
+                # print ('weights: ',self.weights)
+
         #write down the valuable trained result into a file so that we can reuse this particular set of weights for refining
         #or train another data set
         #w+ means overwrite the file if exist, can be changed
