@@ -5,8 +5,8 @@ from skimage.morphology import thin
 from skimage.measure import label
 from skimage.measure import regionprops
 def get_features(x,mode,flat=False):
-    """Get desired features from input dataset. mode is a string:'digits', 
-    'zernike'. If flat is True, digits are returned in a stacked array, which 
+    """Get desired features from input dataset. mode is a string:'digits',
+    'zernike'. If flat is True, digits are returned in a stacked array, which
     works with logreg, SVM, etc.. Otherwise, digits are returned as a list of 3
     seperated digits."""
     X = np.zeros(x.shape)
@@ -15,7 +15,7 @@ def get_features(x,mode,flat=False):
     X_thin = np.zeros(x.shape)
     for i,I in enumerate(X):
         X_thin[i,:,:] = thin(I,8)
-    X_lab = np.zeros(x1.shape)
+    X_lab = np.zeros(x.shape)
     for i,I in enumerate(X_thin):
         X_lab[i,:,:] = label(I,background=0)
     X_prop = []
@@ -72,5 +72,5 @@ def get_features(x,mode,flat=False):
                 img.append(img[0])
             if len(img) == 1:
                 img.extend([img[0], img[0]])
-            X_sep.append(np.hstack([img[0],img[1],img[2]])) 
+            X_sep.append(np.hstack([img[0],img[1],img[2]]))
         return X_sep
