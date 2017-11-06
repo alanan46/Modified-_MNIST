@@ -15,7 +15,7 @@ def get_features(x,mode,flat=False):
     X_thin = np.zeros(x.shape)
     for i,I in enumerate(X):
         X_thin[i,:,:] = thin(I,8)
-    X_lab = np.zeros(x1.shape)
+    X_lab = np.zeros(x.shape)
     for i,I in enumerate(X_thin):
         X_lab[i,:,:] = label(I,background=0)
     X_prop = []
