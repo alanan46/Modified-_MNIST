@@ -91,9 +91,10 @@ class NN:
         # the one_ hot function will do the dirty work for us to cast a possible label to 40 classes
         # onehot_label=tf.one_hot(indices=tf.cast(label[0], tf.int32), depth=40)
         # feed the class number to onehot and get the onhot representation
-        index=NN.label_class.index(label[0])
-        print ("index is ",index)
-        onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
+        if(not prediction_mode):
+            index=NN.label_class.index(label[0])
+            print ("index is ",index)
+            onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
         # print ('out_layer ',output_layer)
         #the output_layer will contain 40 neurons,convert them to tensor object
         #so that we can use the tf.losses.softmax_cross_entropy()
@@ -162,12 +163,14 @@ class NN:
         #write down the valuable trained result into a file so that we can reuse this particular set of weights for refining
         #or train another data set
         #w+ means overwrite the file if exist, can be changed
-        with open("./weights.npy",'w+') as f:
-            np.save(f,self.weights)
+        # with open("./weights.npy",'w+') as f:
+        #     np.save(f,self.weights)
 
+####!!!!!! in debug mode 
     def predict(self,prediction_x):
         if(not self.trained):self.train()
-        for layer in self.foward_pass(prediction_x):pass
+        for layer in self.forward_pass(prediction_x):pass
         #label is dummy here, the value we give is not used  since we are in prediction mode
-        index=self.eval_output(label=0,output_layer=layer,prediction_mode=True)
+        index,prob=self.eval_output(label=0,output_layer=layer,prediction_mode=True)
+        print prob
         return NN.label_class[index]
