@@ -17,5 +17,5 @@ y = y.astype(np.int32, copy=False)
 # train on 90% of the whole input data
 train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.9, random_state=412)
 #hidden layer=1, 10 neuron per hidden layer, learn_rate =0.5 epoch =4
-testNN= NN(train_data,train_labels,1,10,0.001,2)
+testNN= NN(train_data,train_labels,1,10,0.1,2)
 testNN.train()
