@@ -11,9 +11,12 @@ class NN:
      In this design, we do cross Validation outside the class
      i.e. we feed in the input_x,input_y as they would have been seperated already
      """
-    # label_class=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 24, 25,
-    #   27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 54, 56, 63, 64, 72, 81]
-    label_class=[[1,0,0],[0,1,0],[0,0,1]]
+
+    label_class=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+     11, 12, 13, 14, 15, 16, 17, 18, 20, 21, 24, 25,
+     27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 54, 56, 63, 64, 72, 81]
+    # this is our one hot encoding look up array, it is same mathematically as a I_40, Identity matrix 40x40
+    one_hot_array=np.array([[1 if j==i else 0 for j in xrange(40)] for i in xrange(40) ])
     def __init__(self,input_x,input_y,num_of_hidden_layer,num_of_neuron_per_layer,learn_rate,epochs):
         self.num_of_hidden_layer=num_of_hidden_layer
         self.num_of_neuron_per_layer=num_of_neuron_per_layer
@@ -42,8 +45,11 @@ class NN:
         for _ in xrange(self.num_of_hidden_layer-1):
             sizeArr.append( (self.num_of_neuron_per_layer,self.num_of_neuron_per_layer) )
         #init weights to calculate last hidden layer --> output layer
-        sizeArr.append((3,self.num_of_neuron_per_layer) )
+        sizeArr.append((40,self.num_of_neuron_per_layer) )
         self.weights=[np.random.uniform(-.5, .5,size) for size in sizeArr]
+
+    def get_onehot_label(self,original_label):
+        return NN.one_hot_array[ NN.label_class.index(original_label) ]
 
     def get_relu_deriv(self,x):
         x[x<=0]=0
@@ -64,10 +70,9 @@ class NN:
         err=0.0
         print ("length :",len(predictions))
         for (prediction,label) in zip(predictions,labels):
-            if (prediction[0] !=label[0]):
-                print(prediction[0],label[0])
+            if (prediction !=label):
                 err+=1
-        print("error:",1.0-err/len(predictions) )
+        print("accuracy:",1.0-err/len(predictions) )
         return (1-err/len(predictions))
 
     #calcuate Rectified Linear Unit we may want to consider using relu instead of sigmoid
@@ -85,10 +90,9 @@ class NN:
 
             layer_input=self.get_sigmoid(np.dot(layer_input,layer_weights.T))
             yield layer_input
-    # evaluation function to calcuate the difference of the prediction and the true label
-    # empty for now
-    # should return a score that we wish to minimize in training mode
 
+    # ------this function is disabled for now------
+    # should return a score that we wish to minimize in training mode
     # return a class in prediciton mode
     def eval_output(self,label,output_layer,prediction_mode=False):
 
@@ -127,14 +131,14 @@ class NN:
         # onehot_label=tf.one_hot(indices=tf.cast(index, tf.int32 ), depth=40)
         # tmp=(self.sess.run(onehot_label)-layers[-1])
         # tmp=self.eval_output(label,layers[-1])*self.get_sigmoid_deriv(layers[-1])
-        tmp=(label -layers[-1] )*self.get_sigmoid_deriv(layers[-1])
+            #y-o(i)
+        tmp=(self.get_onehot_label(label) -layers[-1] )*self.get_sigmoid_deriv(layers[-1])
 
         # hidden_layers=copy.deepcopy(layers)
         # del hidden_layers[0] # delete the input layer
         #starting from the last hidden layer aka layers[-2] with the last elements of weights
         for layer,layer_weights in zip(layers[-2::-1],self.weights[::-1]):
             #yield it and calcuate the next delta after yielding
-
                 yield tmp
                 tmp=np.dot(tmp,layer_weights)*self.get_sigmoid_deriv(layer)
 
@@ -153,15 +157,14 @@ class NN:
     def train(self):
         self.trained=True
         for i in xrange(self.epochs):
-
-            j=1
+            print("on epoch:", i)
+            # j=1
             for (x,y) in zip(self.input_x,self.input_y):
                 #updates the weights matrix after every round of back_prop
                 self.weights=self.back_prop(np.array(y),list(self.forward_pass(x)))
-                print("on epoch:", i)
-                print ("on train_data : ",j)
-
-                j+=1
+                # print("on epoch:", i)
+                # print ("on train_data : ",j)
+                # j+=1
                 # print ('weights: ',self.weights)
 
         #write down the valuable trained result into a file so that we can reuse this particular set of weights for refining
@@ -176,4 +179,7 @@ class NN:
         for layer in self.forward_pass(prediction_x):pass
 
         print('layer',layer)
-        return layer
+        index=np.argmax(layer)
+        print ('index in class array:',index)
+        print("prediciton:", NN.label_class[index])
+        return NN.label_class[index]
