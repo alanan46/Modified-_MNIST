@@ -15,7 +15,7 @@ K.set_image_dim_ordering('th')
 np.random.seed(10)
 x = np.loadtxt("half2_train_x.csv", delimiter=",") # load from text
 y = np.loadtxt("half2_train_y.csv", delimiter=",")
-  #x = x.reshape(-1, 64, 64) # reshape
+x = x.reshape(-1, 64, 64) # reshape
 x=x.astype('float32')
 #normalization to 0-1
 x=x/255.0
