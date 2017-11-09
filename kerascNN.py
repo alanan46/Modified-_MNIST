@@ -10,7 +10,7 @@ from keras.layers.convolutional import MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
 from sklearn.model_selection import train_test_split
-
+from sklearn.preprocessing import LabelEncoder
 K.set_image_dim_ordering('th')
 np.random.seed(10)
 x = np.loadtxt("half2_train_x.csv", delimiter=",") # load from text
@@ -21,6 +21,8 @@ x=x.astype('float32')
 x=x/255.0
 y = y.reshape(-1)
 #one hot encoding
+encoder=LabelEncoder()
+y=encoder.fit(y)
 y=np_utils.to_categorical(y)
 train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.1, random_state=42)
 num_classes = 40
