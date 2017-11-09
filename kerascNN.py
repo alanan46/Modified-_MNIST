@@ -15,7 +15,7 @@ K.set_image_dim_ordering('th')
 np.random.seed(10)
 x = np.loadtxt("half2_train_x.csv", delimiter=",") # load from text
 y = np.loadtxt("half2_train_y.csv", delimiter=",")
-x = x.reshape(-1, 64, 64) # reshape
+x = x.reshape(-1,1, 64, 64) # reshape
 x=x.astype('float32')
 #normalization to 0-1
 x=x/255.0
@@ -58,5 +58,8 @@ print(model.summary())
 # Fit the model
 model.fit(train_data, train_labels, validation_data=(eval_data, eval_labels), epochs=epochs, batch_size=32)
 # Final evaluation of the model
-scores = model.evaluate(X_test, y_test, verbose=0)
-print("Accuracy: %.2f%%" % (scores[1]*100))
+scores1 = model.evaluate(train_data, train_labels, verbose=0)
+print("Accuracy: %.2f%%" % (scores1[1]*100))
+
+scores2 = model.evaluate(eval_data, eval_labels, verbose=0)
+print("Accuracy: %.2f%%" % (scores2[1]*100))
