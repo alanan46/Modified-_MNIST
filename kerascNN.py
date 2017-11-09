@@ -22,8 +22,9 @@ x=x/255.0
 y = y.reshape(-1)
 #one hot encoding
 encoder=LabelEncoder()
-y=encoder.fit(y)
-y=np_utils.to_categorical(y)
+encoder.fit(y)
+encoded_y=encoder.transform(y)
+y=np_utils.to_categorical(encoded_y)
 train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.1, random_state=42)
 num_classes = 40
 
