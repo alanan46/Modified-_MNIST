@@ -37,7 +37,7 @@ def cnn_model_fn(features, labels, mode):
   # Computes 32 features using a 5x5 filter with ReLU activation.
   # Padding is added to preserve width and height.
   # Input Tensor Shape: [batch_size, 28, 28, 1] new [batch_size, 64, 64, 1]
-  # Output Tensor Shape: [batch_size, 28, 28, 32] new [batch_size, 64, 64, 32]
+  # Output Tensor Shape: [batch_size, 28, 28, 32] new [batch_size, 64, 64, 32] 32 is number of filters also number of filter maps
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
       filters=32,
@@ -49,15 +49,18 @@ def cnn_model_fn(features, labels, mode):
   # First max pooling layer with a 2x2 filter and stride of 2
   # Input Tensor Shape: [batch_size, 28, 28, 32] new [batch_size, 64, 64, 32]
   # Output Tensor Shape: [batch_size, 14, 14, 32] new [batch_size, 32, 32,64]
-  pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+ # pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
 
   # Convolutional Layer #2
   # Computes 64 features using a 5x5 filter.
   # Padding is added to preserve width and height.
   # Input Tensor Shape: [batch_size, 14, 14, 32] new [batch_size, 32, 32, 32]
   # Output Tensor Shape: [batch_size, 14, 14, 64] new [batch_size, 32, 32, 64]
+
+#-------------------
+#input [batch_size, 64,64,32] output [batch_size, 64, 64, 64]
   conv2 = tf.layers.conv2d(
-      inputs=pool1,
+      inputs=conv1,
       filters=64,
       kernel_size=[5, 5],
       padding="same",
@@ -67,28 +70,72 @@ def cnn_model_fn(features, labels, mode):
   # Second max pooling layer with a 2x2 filter and stride of 2
   # Input Tensor Shape: [batch_size, 14, 14, 64]  new [batch_size, 32, 32, 64]
   # Output Tensor Shape: [batch_size, 7, 7, 64]  new [batch_size, 16, 16, 64]
-  pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+  # pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+
+  #input [batch_size, 64, 64, 64] output [batch_size, 32, 32, 64]
+  pool1 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 
 #conv3
-#Input [batch_size,16,16,64]
-#Output [batch_size 16,16,96]
+#Input [batch_size,32,32,64]
+#Output [batch_size 32,32,96]
   conv3= tf.layers.conv2d(
-      inputs=pool2,
+      inputs=pool1,
+      filters=96,
+      kernel_size=[5, 5],
+      padding="same",
+      activation=tf.nn.relu)
+
+#conv4
+#Input [batch_size,32,32,96]
+#Output [batch_size 32,32,96]
+
+
+  conv4= tf.layers.conv2d(
+      inputs=conv3,
       filters=96,
       kernel_size=[5, 5],
       padding="same",
       activation=tf.nn.relu)
 
 
-      #pool3
-      #Input [batch_size 16,16,96]
-      #output [batch_size 8,8,96]
-  pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=2)
+      #pool2
+      #Input [batch_size 32,32,96]
+      #output [batch_size 16,16,96]
+  pool2 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=2)
+
+  #conv5
+  #Input [batch_size,16,16,96]
+  #Output [batch_size 16,16,96]
+
+
+  conv5= tf.layers.conv2d(
+        inputs=pool2,
+        filters=96,
+        kernel_size=[5, 5],
+        padding="same",
+        activation=tf.nn.relu)
+
+    #conv6
+    #Input [batch_size,16,16,96]
+    #Output [batch_size 16,16,96]
+
+
+  conv6= tf.layers.conv2d(
+          inputs=conv5,
+          filters=96,
+          kernel_size=[5, 5],
+          padding="same",
+          activation=tf.nn.relu)
+
+          #pool3
+          #Input [batch_size 16,16,96]
+          #output [batch_size 8,8,96]
+  pool3 = tf.layers.max_pooling2d(inputs=conv6, pool_size=[2, 2], strides=2)
 
 
   # Flatten tensor into a batch of vectors
   # Input Tensor Shape: [batch_size, 7, 7, 64] new [batch_size, 8, 8, 96]
-  # Output Tensor Shape: [batch_size, 7 * 7 * 64]  new [batch_size, 16, 16, 96]
+  # Output Tensor Shape: [batch_size, 7 * 7 * 64]  new [batch_size, 8, 8, 96]
   pool3_flat = tf.reshape(pool3, [-1, 8 * 8 * 96])
 
   # Dense Layer
@@ -96,11 +143,11 @@ def cnn_model_fn(features, labels, mode):
   # Input Tensor Shape: [batch_size, 7 * 7 * 64] new [batch_size, 16, 16, 192]
   # Output Tensor Shape: [batch_size, 1024]
   dense1 = tf.layers.dense(inputs=pool3_flat, units=1024, activation=tf.nn.relu)
-  dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.relu)
-  dense3= tf.layers.dense(inputs=dense2, units=1024, activation=tf.nn.relu)
-  # Add dropout operation; 0.6 probability that element will be kept
+  # dense2 = tf.layers.dense(inputs=dense1, units=1024, activation=tf.nn.relu)
+  # dense3= tf.layers.dense(inputs=dense2, units=1024, activation=tf.nn.relu)
+  # # Add dropout operation; 0.6 probability that element will be kept
   dropout = tf.layers.dropout(
-      inputs=dense3, rate=0.2, training=mode == tf.estimator.ModeKeys.TRAIN)
+      inputs=dense1, rate=0.2, training=mode == tf.estimator.ModeKeys.TRAIN)
 
   # Logits layer
   # Input Tensor Shape: [batch_size, 1024]
@@ -123,6 +170,7 @@ def cnn_model_fn(features, labels, mode):
   with tf.name_scope("Evaluating") as scope:
     correct_prediction = tf.equal(pred_class, tf.argmax(onehot_labels,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+   # print(accuracy)
     accuracy_summary = tf.summary.scalar("accuracy", accuracy)
   loss = tf.losses.softmax_cross_entropy(
       onehot_labels=onehot_labels, logits=logits)
@@ -131,7 +179,7 @@ def cnn_model_fn(features, labels, mode):
 
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
     train_op = optimizer.minimize(
         loss=loss,
         global_step=tf.train.get_global_step())
@@ -182,12 +230,12 @@ def main(unused_argv):
   train_input_fn = tf.estimator.inputs.numpy_input_fn(
       x={"x": train_data},
       y=train_labels,
-      batch_size=100,
+      batch_size=16,
       num_epochs=None,
       shuffle=True)
   mnist_classifier.train(
       input_fn=train_input_fn,
-      steps=1000,
+      steps=300,
       hooks=[logging_hook])
 
   # Evaluate the model and print results
