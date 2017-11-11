@@ -33,41 +33,45 @@ def train(x_file="x1000.csv",y_file="y1000.csv",job_dir="./tmp/keras",**args):
     x = x.reshape(-1,1, 64, 64) # reshape
     x=x.astype('float32')
     #normalization to 0-1
-    x=x/255.0
+    x=x/np.amax(x)
     y = y.reshape(-1)
     #one hot encoding
     encoder=LabelEncoder()
     encoder.fit(y)
     encoded_y=encoder.transform(y)
     y=np_utils.to_categorical(encoded_y)
-    train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.1, random_state=42)
+    train_data, eval_data, train_labels, eval_labels = train_test_split(x, y, test_size=0.2, random_state=42)
     num_classes = 40
 
     # Create the model
     model = Sequential()
-    model.add(Conv2D(16, (3, 3), input_shape=(1, 64, 64), padding='same', activation='relu', kernel_constraint=maxnorm(3)))
-    # model.add(Dropout(0.2))
-    model.add(Conv2D(16, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
 
+    model.add(Conv2D(16, (5, 5), input_shape=(1, 64, 64), padding='same', activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(16, (5, 5), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.2))
 
-    model.add(Conv2D(32, (3, 3),  padding='same', activation='relu', kernel_constraint=maxnorm(3)))
-    # model.add(Dropout(0.2))
-    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (5, 5),  padding='same', activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (5, 5), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
+    model.add(Dropout(0.2))
 
     model.add(Conv2D(64, (3, 3),  padding='same', activation='relu', kernel_constraint=maxnorm(3)))
     # model.add(Dropout(0.2))
     model.add(Conv2D(64, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
+    model.add(Conv2D(64, (3, 3),  padding='same', activation='relu', kernel_constraint=maxnorm(3)))
+        # model.add(Dropout(0.2))
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+
     model.add(Flatten())
-    model.add(Dense(300, activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Dense(200, activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Dense(200, activation='relu', kernel_constraint=maxnorm(3)))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='softmax'))
     # Compile model
-    epochs = 100
+    epochs = 200
     lrate = 0.01
     decay = lrate/epochs
     sgd = SGD(lr=lrate, momentum=0.9, decay=decay, nesterov=False)
@@ -82,7 +86,7 @@ def train(x_file="x1000.csv",y_file="y1000.csv",job_dir="./tmp/keras",**args):
     print("Test Accuracy: %.2f%%" % (scores1[1]*100))
     model.save("model.h5")
         # Save model.h5 on to google storage
-    with file_io.FileIO('model.kcNN', mode='r') as input_f:
+    with file_io.FileIO('model.h5', mode='r') as input_f:
         with file_io.FileIO(job_dir + '/model.h5', mode='w+') as output_f:
             output_f.write(input_f.read())
 if __name__ == '__main__':
