@@ -1,4 +1,4 @@
-#this package runs on gcloud 
+#this package runs on gcloud the main module is trainer/kerascNN 
 #install gcloud first
 # note --config=trainer/cloudml-gpu.yaml  this line will get you a GPU on 
 open terminal
