@@ -134,7 +134,7 @@ class aNN:
             updated_weights=layer_weights+ self.learn_rate*np.outer(delta,layer)
             result.append( updated_weights )
 
-        return result
+        self.weights=result
 
     #this function will use the back_prop and forward_pass
     def train(self,file_path="./weights.npy"):
@@ -145,7 +145,7 @@ class aNN:
             for (x,y) in zip(self.input_x,self.input_y):
                 #updates the weights matrix after every round of back_prop
                 self.forward_pass(x)
-                self.weights=self.back_prop(np.array(y))
+                self.back_prop(np.array(y))
 
         #write down the valuable trained result into a file so that we can reuse this particular set of weights for refining
         #w+ means overwrite the file if exist, can be changed
