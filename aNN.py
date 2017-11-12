@@ -49,7 +49,7 @@ class aNN:
         sizeArr.append((40,self.num_of_neuron_per_layer) )
 
         #self.weights attribute stores the weights matrix
-
+        #init weights matrix from -0.5 to 0.5 
         self.weights=[np.random.uniform(-.5, .5,size) for size in sizeArr]
         self.layers=[]
         self.deltas=[]
@@ -92,22 +92,19 @@ class aNN:
     # one iteration of forward pass
     #every time we update the matrix self.layers
     def forward_pass(self,layer_input):
-        # for the 0 layer,aka the input layer, just yield the data, i.e the output for layer 0
+        # clean up layers matrix
         self.layers=[]
-        # print ("linput",layer_input)
+        # append input layer
         self.layers.append(layer_input)
-
-        #weights is an array of weights
         i=0
         for layer_weights in self.weights:
-            # this will yield o_i, output for layer i
+            # use previous layer to get current layer 
             layer_input=self.layers[i]
-
             i+=1
             #dim layer input for first layer =1x4096 for raw pixel and dim layer_weights[0]=num_of_neuron_per_layer x 4096 for raw pixel
             layer_output=self.get_sigmoid(np.dot(layer_input,layer_weights.T))
-            # print ("inforloop",layer_output)
             self.layers.append(layer_output)
+        # after function finished we have a layer matrix  stored in self.layers
 
     # store the deltas in self.deltas
     def get_deltas(self,label):
@@ -133,10 +130,12 @@ class aNN:
                                             #outer(a,b) will return a matrix dim:MxN given dim(a)=M dim(b)=N
             updated_weights=layer_weights+ self.learn_rate*np.outer(delta,layer)
             result.append( updated_weights )
-
+        #store weights in class attribute 
         self.weights=result
 
     #this function will use the back_prop and forward_pass
+    # after training, it will store the weights in a .npy file so that we can load later
+    # and use it to predict
     def train(self,file_path="./weights.npy"):
         self.trained=True
         for i in xrange(self.epochs):
@@ -156,9 +155,9 @@ class aNN:
     def predict(self,prediction_x):
         if(not self.trained):self.train()
         self.forward_pass(prediction_x)
-        for layer in self.layers :pass
-
+        layer=self.layers[-1]
         print('layer',layer)
+        # get the most probable index of the output layer
         index=np.argmax(layer)
         print ('index in class array:',index)
         print("prediciton:", aNN.label_class[index])
