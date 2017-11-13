@@ -19,7 +19,7 @@ import argparse
 
 K.set_image_dim_ordering('th')
 np.random.seed(10)
-def train(x_file="x1000.csv",y_file="y1000.csv",job_dir="./tmp/keras",**args):
+def train(x_file="train_x.csv",y_file="train_y.csv",job_dir="./tmp/keras",**args):
     log_path=job_dir+'/logs/'+datetime.now().isoformat()
     print('-----------------------')
     print('Using train_file located at {}'.format(x_file))
