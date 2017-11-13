@@ -10,9 +10,8 @@ It is run by the driver named _____
 
 The main module for the convolutional neural network implemented is kcNN/trainer/kerascNN_final.py
 
-The script that generates prediction for cNN result is predict/prediction.py Note that the actual model we trained is not 
-
-uploaded 
+The script that generates prediction for cNN result is predict/prediction.py the trained model is uploaded and called
+final2_model.h5
 
 The toyaNN.py and toyaNN_driver.py are testing modules. We tried a vector memorization problem with it to see
 
