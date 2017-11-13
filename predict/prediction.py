@@ -2,7 +2,7 @@ import keras
 import numpy as np
 import pandas as pd
 from keras.models import load_model
-model = load_model('final2_model.h5')
+model = load_model('dkcnn7_model.h5')
 x = np.loadtxt("test_x.csv", delimiter=",") # load from text
 x = x.reshape(-1,1, 64, 64) # reshape
 x=x.astype('float32')
@@ -23,4 +23,4 @@ def CSVify(myList,name):
     df['index']=df['index']+1
     df.to_csv(name+'.csv',header=['Id','LABEL'],index=False)
 
-CSVify(y,"final2")
+CSVify(y,"dkcnn7")
