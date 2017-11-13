@@ -67,6 +67,8 @@ class aNN:
 
     #calculate the sigmoid function result based on input number
     def get_sigmoid(self,x):
+        #an interval is set so that result is numerically stable
+        x=np.clip( x, -500, 500 )
         return 1.0/(1+np.exp(-x))
 
     #calculate the derivative of sigmoid function result on input number
