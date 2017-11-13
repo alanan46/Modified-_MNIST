@@ -19,7 +19,7 @@ train_data, eval_data, train_labels, eval_labels = train_test_split(X, y, test_s
                                                                     random_state=41, stratify = y)
 
 print "Training model..."
-#hidden layer=3, 50 neuron per hidden layer, learn_rate =0.1 epoch =100
+#hidden layer=3, 90 neuron per hidden layer, learn_rate =0.001 epoch =300
 testNN= aNN(train_data,train_labels,3,90,0.001,300)
 """note in the train function after it finishes, it will write a file and save it if u trained again without
 changing the file path it will OVERWRITE
