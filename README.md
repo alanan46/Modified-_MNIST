@@ -16,3 +16,5 @@ final2_model.h5
 The toyaNN.py and toyaNN_driver.py are testing modules. We tried a vector memorization problem with it to see
 
 whether the aNN implemented works or not.
+
+project_3_stats.m is a MATLAB file which plotted the class distribution and the cross-validation results for hidden layers of NN.
